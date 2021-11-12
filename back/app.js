@@ -1,9 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const sauceRoutes = require("./routes/sauce.routes");
+const userRoutes = require("./routes/user.routes");
 
 mongoose
-	.connect("mongodb+srv://alexis:hottakesPWD@cluster0.5iykr.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
+	.connect("mongodb+srv://alexis:hottakesPWD@cluster0.5iykr.mongodb.net/hotTakes?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
 	.then(() => console.log("Connected to MongoDB"))
 	.catch(() => console.log("Cannot connect to MongoDB"));
 
@@ -18,6 +19,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-app.use("/api/stuff", sauceRoutes);
+app.use("/api/sauces", sauceRoutes);
+app.use("/api/auth", userRoutes);
 
 module.exports = app;
