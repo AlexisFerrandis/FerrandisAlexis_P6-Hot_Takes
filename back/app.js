@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const Sauce = require("./models/sauce");
 
 const app = express();
 
@@ -18,8 +19,14 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.post("/api/sauces", (req, res, next) => {
-	console.log(req.body);
-	res.status(201).json({ message: "Salsa created" });
+	delete req.body._id;
+	const sauce = new Sauce({
+		...req.body,
+	});
+	sauce
+		.save()
+		.then(() => res.status(201).json({ message: "Sauce saved" }))
+		.catch((error) => res.status(400).json({ error }));
 });
 
 app.use("/api/auth/login", (req, res, next) => {
