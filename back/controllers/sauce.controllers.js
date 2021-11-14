@@ -1,6 +1,7 @@
 const Sauce = require("../models/Sauce");
 const fs = require("fs");
 
+// Add a new sauce and save it in db
 exports.createSauce = (req, res, next) => {
 	const sauceObject = JSON.parse(req.body.sauce);
 	delete sauceObject._id;
@@ -25,6 +26,7 @@ exports.createSauce = (req, res, next) => {
 		.catch((error) => res.status(400).json({ error }));
 };
 
+// Let owner modify text and image of his sauce
 exports.modifySauce = (req, res, next) => {
 	const sauceObject = req.file
 		? {
@@ -37,6 +39,7 @@ exports.modifySauce = (req, res, next) => {
 		.catch((error) => res.status(400).json({ error }));
 };
 
+// Let owner delete his sauce
 exports.deleteSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
 		.then((sauce) => {
@@ -50,14 +53,21 @@ exports.deleteSauce = (req, res, next) => {
 		.catch((error) => res.status(500).json({ error }));
 };
 
-exports.likeSauce = (req, res, next) => {};
+// Enable like/dislike, save users in an array
+exports.likeSauce = (req, res, next) => {
+	Sauce.findOne({ _id: req.params.id })
+		.then((sauce) => {})
+		.catch((error) => res.status(400).json({ error }));
+};
 
+// Display a specific sauce
 exports.getOneSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
 		.then((sauce) => res.status(200).json(sauce))
 		.catch((error) => res.status(404).json({ error }));
 };
 
+// Display all sauce on home
 exports.getAllSauces = (req, res, next) => {
 	Sauce.find()
 		.then((sauces) => res.status(200).json(sauces))

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 
+// If jwt valid, enable access
 module.exports = (req, res, next) => {
 	try {
 		const token = req.headers.authorization.split(" ")[1];
