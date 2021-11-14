@@ -56,7 +56,20 @@ exports.deleteSauce = (req, res, next) => {
 // Enable like/dislike, save users in an array
 exports.likeSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
-		.then((sauce) => {})
+		.then((sauce) => {
+			// if like == 1 {
+			// 		check !user in usersLiked
+			//			push & likes++
+			// }
+			// else if like == 0 {
+			// 		if userLikeIndex > -1 likes--
+			//		if userDislikeIndex > -1 dislikes--
+			// }
+			// else if like == -1 {
+			// 		check !user in usersDisliked
+			//			push & dislike++
+			// }
+		})
 		.catch((error) => res.status(400).json({ error }));
 };
 
