@@ -1,11 +1,23 @@
 const Sauce = require("../models/Sauce");
+const fs = require("fs");
 
 exports.createSauce = (req, res, next) => {
 	const sauceObject = JSON.parse(req.body.sauce);
 	delete sauceObject._id;
+	const usersLikedArray = new Array();
+	const usersDislikedArray = new Array();
 	const sauce = new Sauce({
-		...sauceObject,
+		userId: sauceObject.userId,
+		name: sauceObject.name,
+		manufacturer: sauceObject.manufacturer,
+		description: sauceObject.description,
+		mainPepper: sauceObject.mainPepper,
 		imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+		heat: sauceObject.heat,
+		likes: 0,
+		dislikes: 0,
+		usersLiked: usersLikedArray,
+		usersDisliked: usersDislikedArray,
 	});
 	sauce
 		.save()
@@ -26,9 +38,16 @@ exports.modifySauce = (req, res, next) => {
 };
 
 exports.deleteSauce = (req, res, next) => {
-	Sauce.deleteOne({ _id: req.params.id })
-		.then(() => res.status(200).json({ message: "Sauce has been deleted" }))
-		.catch((error) => res.status(400).json({ error }));
+	Sauce.findOne({ _id: req.params.id })
+		.then((sauce) => {
+			const filename = sauce.imageUrl.split("/images/")[1];
+			fs.unlink(`images/${filename}`, () => {
+				Sauce.deleteOne({ _id: req.params.id })
+					.then(() => res.status(200).json({ message: "Sauce has been deleted" }))
+					.catch((error) => res.status(400).json({ error }));
+			});
+		})
+		.catch((error) => res.status(500).json({ error }));
 };
 
 exports.getOneSauce = (req, res, next) => {
