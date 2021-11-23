@@ -57,20 +57,46 @@ exports.deleteSauce = (req, res, next) => {
 exports.likeSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
 		.then((sauce) => {
-			// if like == 1 {
-			// 		check !user in usersLiked
-			//			push & likes++
-			// }
-			// else if like == 0 {
-			// 		if userLikeIndex > -1 likes--
-			//		if userDislikeIndex > -1 dislikes--
-			// }
-			// else if like == -1 {
-			// 		check !user in usersDisliked
-			//			push & dislike++
-			// }
+			if (req.body.like == 1) {
+				if (!sauce.usersLiked.includes(req.body.userId)) {
+					sauce.usersLiked.push(req.body.userId);
+					sauce.likes++;
+				}
+			} else if (req.body.like == 0) {
+				const usersLikedIndex = sauce.usersLiked.indexOf(req.body.userId);
+				const usersDislikedIndex = sauce.usersDisliked.indexOf(req.body.userId);
+				if (usersLikedIndex > -1) {
+					sauce.usersLiked.splice(usersLikedIndex, 1);
+					sauce.likes--;
+				}
+				if (usersDislikedIndex > -1) {
+					sauce.usersDisliked.splice(usersDislikedIndex, 1);
+					sauce.dislikes--;
+				}
+				console.log(sauce);
+			} else if (req.body.like == -1) {
+				if (!sauce.usersDisliked.includes(req.body.userId)) {
+					sauce.usersDisliked.push(req.body.userId);
+					sauce.dislikes++;
+				}
+			}
+			Sauce.updateOne({ _id: req.params.id }, sauce)
+				.then(() => {
+					res.status(201).json({
+						message: "Sauce has been liked or disliked",
+					});
+				})
+				.catch((error) => {
+					res.status(400).json({
+						error: error,
+					});
+				});
 		})
-		.catch((error) => res.status(400).json({ error }));
+		.catch((error) => {
+			res.status(400).json({
+				error: error,
+			});
+		});
 };
 
 // Display a specific sauce
