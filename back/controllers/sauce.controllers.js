@@ -1,6 +1,20 @@
 const Sauce = require("../models/Sauce");
 const fs = require("fs");
 
+// Display all sauce on home
+exports.getAllSauces = (req, res, next) => {
+	Sauce.find()
+		.then((sauces) => res.status(200).json(sauces))
+		.catch((error) => res.status(400).json({ error }));
+};
+
+// Display a specific sauce
+exports.getOneSauce = (req, res, next) => {
+	Sauce.findOne({ _id: req.params.id })
+		.then((sauce) => res.status(200).json(sauce))
+		.catch((error) => res.status(404).json({ error }));
+};
+
 // Add a new sauce and save it in db
 exports.createSauce = (req, res, next) => {
 	const sauceObject = JSON.parse(req.body.sauce);
@@ -73,7 +87,6 @@ exports.likeSauce = (req, res, next) => {
 					sauce.usersDisliked.splice(usersDislikedIndex, 1);
 					sauce.dislikes--;
 				}
-				console.log(sauce);
 			} else if (req.body.like == -1) {
 				if (!sauce.usersDisliked.includes(req.body.userId)) {
 					sauce.usersDisliked.push(req.body.userId);
@@ -97,18 +110,4 @@ exports.likeSauce = (req, res, next) => {
 				error: error,
 			});
 		});
-};
-
-// Display a specific sauce
-exports.getOneSauce = (req, res, next) => {
-	Sauce.findOne({ _id: req.params.id })
-		.then((sauce) => res.status(200).json(sauce))
-		.catch((error) => res.status(404).json({ error }));
-};
-
-// Display all sauce on home
-exports.getAllSauces = (req, res, next) => {
-	Sauce.find()
-		.then((sauces) => res.status(200).json(sauces))
-		.catch((error) => res.status(400).json({ error }));
 };
