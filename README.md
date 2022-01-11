@@ -30,4 +30,4 @@ Use `Ctrl+C` in the terminal to stop the local server.
 -   bcrypt
 -   multer
 
-![Screenchot-preview](./front/assets/images/hottakes.png)
+![Screenchot-preview](./front/hottakes.png)
