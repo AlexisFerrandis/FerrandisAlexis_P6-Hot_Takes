@@ -42,27 +42,39 @@ exports.createSauce = (req, res, next) => {
 
 // Let owner modify text and image of his sauce
 exports.modifySauce = (req, res, next) => {
-	const sauceObject = req.file
-		? {
-				...JSON.parse(req.body.sauce),
-				imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
-		  }
-		: { ...req.body };
-	Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-		.then(() => res.status(200).json({ message: "Sauce has been modified" }))
-		.catch((error) => res.status(400).json({ error }));
+	Sauce.findOne({ _id: req.params.id })
+		.then((sauce) => {
+			if (req.body.userId === sauce.userId) {
+				const sauceObject = req.file
+					? {
+							...JSON.parse(req.body.sauce),
+							imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+					  }
+					: { ...req.body };
+				Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+					.then(() => res.status(200).json({ message: "Sauce has been modified" }))
+					.catch((error) => res.status(400).json({ error }));
+			} else {
+				res.status(403).json({ message: "Unauthorized request" });
+			}
+		})
+		.catch((error) => res.status(400).send({ error }));
 };
 
 // Let owner delete his sauce
 exports.deleteSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
 		.then((sauce) => {
-			const filename = sauce.imageUrl.split("/images/")[1];
-			fs.unlink(`images/${filename}`, () => {
-				Sauce.deleteOne({ _id: req.params.id })
-					.then(() => res.status(200).json({ message: "Sauce has been deleted" }))
-					.catch((error) => res.status(400).json({ error }));
-			});
+			if (req.body.userId === sauce.userId) {
+				const filename = sauce.imageUrl.split("/images/")[1];
+				fs.unlink(`images/${filename}`, () => {
+					Sauce.deleteOne({ _id: req.params.id })
+						.then(() => res.status(200).json({ message: "Sauce has been deleted" }))
+						.catch((error) => res.status(400).json({ error }));
+				});
+			} else {
+				res.status(403).send("Unauthorized request");
+			}
 		})
 		.catch((error) => res.status(500).json({ error }));
 };
@@ -71,11 +83,18 @@ exports.deleteSauce = (req, res, next) => {
 exports.likeSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
 		.then((sauce) => {
+			//get a like
 			if (req.body.like == 1) {
 				if (!sauce.usersLiked.includes(req.body.userId)) {
 					sauce.usersLiked.push(req.body.userId);
 					sauce.likes++;
-				}
+				} else if (sauce.usersDisliked.includes(req.body.userId)) {
+					sauce.usersDisliked.splice(usersDislikedIndex, 1);
+					sauce.dislikes--;
+					sauce.usersLiked.push(req.body.userId);
+					sauce.likes++;
+				} else return;
+				// get cancel
 			} else if (req.body.like == 0) {
 				const usersLikedIndex = sauce.usersLiked.indexOf(req.body.userId);
 				const usersDislikedIndex = sauce.usersDisliked.indexOf(req.body.userId);
@@ -87,11 +106,17 @@ exports.likeSauce = (req, res, next) => {
 					sauce.usersDisliked.splice(usersDislikedIndex, 1);
 					sauce.dislikes--;
 				}
+				//get dislike
 			} else if (req.body.like == -1) {
 				if (!sauce.usersDisliked.includes(req.body.userId)) {
 					sauce.usersDisliked.push(req.body.userId);
 					sauce.dislikes++;
-				}
+				} else if (sauce.usersLiked.includes(req.body.userId)) {
+					sauce.usersLiked.splice(usersLikedIndex, 1);
+					sauce.likes--;
+					sauce.usersDisliked.push(req.body.userId);
+					sauce.dislikes++;
+				} else return;
 			}
 			Sauce.updateOne({ _id: req.params.id }, sauce)
 				.then(() => {
