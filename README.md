@@ -1,3 +1,5 @@
+# Hot Takes
+
 ## Sixth project with Openclassrooms
 
 ## Installation
