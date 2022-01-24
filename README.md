@@ -27,6 +27,7 @@ Use `Ctrl+C` in the terminal to stop the local server.
 ### Technologie
 
 -   Express
+-   Node
 -   Mongo
 -   jwt
 -   bcrypt
